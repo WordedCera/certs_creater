@@ -41,7 +41,7 @@ class PrometheusWriter(PrometheusMetrics):
                 context = SSL.Context(method=SSL.TLSv1_2_METHOD)
                 context.load_verify_locations(
                     cafile=certifi.where(),
-                    capath='/Users/a18338474/vsc/certs_backend/certs/chain_pem.txt')
+                    capath='/certs/chain_pem.txt')
                 conn = SSL.Connection(context, socket=socket.socket(socket.AF_INET, socket.SOCK_STREAM))
                 conn.set_tlsext_host_name(hostname.encode('UTF-8'))
                 self.count.labels('INFO', 'olo', hostname, service).inc(1)
