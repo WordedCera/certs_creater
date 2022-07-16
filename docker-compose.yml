@@ -1,0 +1,55 @@
+version: "3"
+
+services:
+  postgres:
+    image: postgres
+    container_name: postgres
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+
+    environment:
+      - POSTGRES_USER=certs_backend
+      - POSTGRES_PASSWORD=qwerty
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - bridge_network
+
+  backend:
+    build: .
+    container_name: backend  
+    ports:
+      - "9443:9443"
+      - "1456:1456"
+    environment:
+      - FLASK_ENV="" #config.DevelopmentConfig
+      - GUNICORN_SERVER_BIND=0.0.0.0:9443 # bind server for gunicorn
+      - GUNICORN_SERVER_WORKERS=2
+      - GUNICORN_SERVER_MAX_REQUEST=1000
+      - DATABASE_PASSWORD=qwerty
+      - DATABASE_USER=certs_backend
+      - DATABASE_PORT=5432
+      - DATABASE_URL=postgres
+      - DATABASE_DB=certs_backend
+      - SERVER_MON_SCHEDULE=minutes # Server monitoring agent scheduler time
+      - SERVER_MON_SCHEDULE_TIMINGS=2 # Server monitoring agent scheduler time
+      - SERVER_SECONDS_TASK_SCHEDULE=20 # Server check certificate scheduler time
+      - JWT_SECRET_KEY=super-sekret
+      - JWT_EXPIRED_TIME=60
+      # - JWT_PUBLIC_KEY='my private key'
+      - CERTS_PATH=certs/
+      - LOGGER_LEVEL=INFO # Log level
+      - SERVER_MINUTES_TASK_SCHEDULE=20
+      - ROUTE_REGISTER_ADMIN=True
+    depends_on:
+      - postgres 
+    networks: 
+      - bridge_network
+
+volumes:
+  postgres_data:
+
+networks:
+  bridge_network:
+    driver: bridge
